@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Breast Cancer Classifier</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(to right, #f0f4f8, #d9e2ec);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+        }
+        .container {
+            background: #ffffff;
+            padding: 40px 50px;
+            border-radius: 15px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            width: 450px;
+        }
+        h2 { color: #1b263b; margin-bottom: 30px; }
+        input[type="file"] { display: none; }
+        .custom-file-upload {
+            display: inline-block;
+            padding: 12px 25px;
+            cursor: pointer;
+            background-color: #1b263b;
+            color: #ffffff;
+            border-radius: 8px;
+            font-weight: bold;
+            margin-bottom: 20px;
+            transition: background 0.3s;
+        }
+        .custom-file-upload:hover { background-color: #415a77; }
+        button {
+            padding: 10px 25px;
+            font-size: 16px;
+            border: none;
+            background-color: #1b263b;
+            color: #fff;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background 0.3s;
+        }
+        button:hover { background-color: #415a77; }
+        img {
+            max-width: 250px;
+            margin-top: 20px;
+            border-radius: 12px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+        .result {
+            margin-top: 25px;
+            font-size: 18px;
+            color: #1b263b;
+            background: #e0f7fa;
+            padding: 15px;
+            border-radius: 10px;
+            font-weight: bold;
+        }
+        canvas { margin-top: 20px; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>🧬 Breast Cancer Image Classifier</h2>
+
+    <form method="POST" enctype="multipart/form-data">
+        <label class="custom-file-upload">
+            Choose Image
+            <input type="file" name="image" accept="image/*" id="imageInput" required>
+        </label>
+        <br>
+        <button type="submit">Classify</button>
+    </form>
+
+    <div id="previewContainer" style="margin-top: 20px; display:none;">
+        <h4>Selected Image:</h4>
+        <img id="previewImage" src="#" alt="Selected Image">
+    </div>
+
+    <script>
+        const imageInput = document.getElementById('imageInput');
+        const previewContainer = document.getElementById('previewContainer');
+        const previewImage = document.getElementById('previewImage');
+
+        imageInput.addEventListener('change', function() {
+            const file = this.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    previewImage.src = e.target.result;
+                    previewContainer.style.display = "block";
+                }
+                reader.readAsDataURL(file);
+            } else {
+                previewContainer.style.display = "none";
+                previewImage.src = "#";
+            }
+        });
+
+        {% if image_path %}
+            previewImage.src = "{{ image_path }}";
+            previewContainer.style.display = "block";
+        {% endif %}
+    </script>
+
+    {% if prediction %}
+        <div class="result">
+            Prediction: {{ prediction }} <br>
+            Confidence: {{ confidence }}%
+        </div>
+
+        <canvas id="probChart" width="400" height="200"></canvas>
+        <script>
+            const ctx = document.getElementById('probChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: {{ class_names | safe }},
+                    datasets: [{
+                        label: 'Prediction Probability (%)',
+                        data: {{ probabilities | safe }},
+                        backgroundColor: ['#1b263b', '#f76c6c'],
+                        borderColor: ['#1b263b', '#f76c6c'],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    indexAxis: 'y',
+                    scales: {
+                        x: {
+                            min: 0,
+                            max: 100,
+                            title: { display: true, text: 'Probability (%)' }
+                        },
+                        y: {
+                            title: { display: true, text: 'Class' }
+                        }
+                    }
+                }
+            });
+        </script>
+    {% endif %}
+</div>
+
+</body>
+</html>
