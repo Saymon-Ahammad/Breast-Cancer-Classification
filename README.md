@@ -28,3 +28,6 @@ Chart.js – Visualizing prediction probabilities
 HTML/CSS/JavaScript – Front-end interface
 
 This project can help healthcare professionals or students quickly screen breast tissue images, visualize prediction confidence, and support accurate decision-making in diagnostic processes.
+
+
+<img width="1915" height="998" alt="project ss" src="https://github.com/user-attachments/assets/9677dd83-b3d6-4191-9a86-b0924edf43a8" />
